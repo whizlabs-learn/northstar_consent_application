@@ -1,9 +1,9 @@
+
 import json
 import logging
 import os
 
 import azure.functions as func
-from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
@@ -18,11 +18,14 @@ def read_json(container, blob_name):
 def enforce_consent(req: func.HttpRequest) -> func.HttpResponse:
     """Intentionally unsafe baseline: checks only whether a consent record exists."""
     try:
-        account_url = os.environ["CONSENT_STORAGE_ACCOUNT_URL"]
-        service = BlobServiceClient(
-            account_url=account_url,
-            credential=DefaultAzureCredential()
+        connection_string = os.environ[
+            "CONSENT_STORAGE_CONNECTION_STRING"
+        ]
+
+        service = BlobServiceClient.from_connection_string(
+            connection_string
         )
+
         input_container = service.get_container_client("input")
         output_container = service.get_container_client("output")
 
@@ -36,8 +39,10 @@ def enforce_consent(req: func.HttpRequest) -> func.HttpResponse:
 
         included = []
         excluded = []
+
         for observation in observations:
             patient = observation.get("subject", {}).get("reference", "")
+
             if patient in patients_with_a_consent_record:
                 included.append(observation)
             else:
@@ -46,31 +51,50 @@ def enforce_consent(req: func.HttpRequest) -> func.HttpResponse:
         bundle = {
             "resourceType": "Bundle",
             "type": "collection",
-            "entry": [{"resource": item} for item in included]
+            "entry": [
+                {"resource": item}
+                for item in included
+            ],
         }
+
         output_container.upload_blob(
             name="naive_research_extract.json",
             data=json.dumps(bundle, indent=2),
-            overwrite=True
+            overwrite=True,
+            content_settings=None,
         )
 
         result = {
-            "message": "Naive extraction completed. This baseline is intentionally unsafe.",
+            "message": (
+                "Naive extraction completed. "
+                "This baseline is intentionally unsafe."
+            ),
             "observations_received": len(observations),
             "observations_included": len(included),
             "observations_excluded": len(excluded),
             "extract_blob": "output/naive_research_extract.json",
-            "warning": "A consent record exists check does not validate status, purpose, scope, or validity dates."
+            "warning": (
+                "A consent record exists check does not validate status, "
+                "purpose, scope, or validity dates."
+            ),
         }
+
         logging.warning(
             "NAIVE baseline completed. Received=%d Included=%d Excluded=%d",
-            len(observations), len(included), len(excluded)
+            len(observations),
+            len(included),
+            len(excluded),
         )
+
         return func.HttpResponse(
-            json.dumps(result), mimetype="application/json", status_code=200
+            json.dumps(result),
+            mimetype="application/json",
+            status_code=200,
         )
+
     except Exception:
         logging.exception("Naive extraction failed")
         return func.HttpResponse(
-            "Naive extraction failed. Check Function logs.", status_code=500
+            "Naive extraction failed. Check Function logs.",
+            status_code=500,
         )
