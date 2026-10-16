@@ -1,0 +1,68 @@
+[
+  {
+    "resourceType": "Observation",
+    "id": "obs-001",
+    "status": "final",
+    "subject": {
+      "reference": "Patient/patient-001"
+    },
+    "code": {
+      "text": "Synthetic blood pressure observation"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "id": "obs-002",
+    "status": "final",
+    "subject": {
+      "reference": "Patient/patient-002"
+    },
+    "code": {
+      "text": "Synthetic glucose observation"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "id": "obs-003",
+    "status": "final",
+    "subject": {
+      "reference": "Patient/patient-003"
+    },
+    "code": {
+      "text": "Synthetic heart rate observation"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "id": "obs-004",
+    "status": "final",
+    "subject": {
+      "reference": "Patient/patient-004"
+    },
+    "code": {
+      "text": "Synthetic temperature observation"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "id": "obs-005",
+    "status": "final",
+    "subject": {
+      "reference": "Patient/patient-005"
+    },
+    "code": {
+      "text": "Synthetic respiratory observation"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "id": "obs-006",
+    "status": "final",
+    "subject": {
+      "reference": "Patient/patient-006"
+    },
+    "code": {
+      "text": "Synthetic oxygen saturation observation"
+    }
+  }
+]
